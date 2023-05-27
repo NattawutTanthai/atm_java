@@ -2,6 +2,8 @@ import java.util.Scanner;
 import java.text.DecimalFormat;
 
 public class main {
+    static boolean isLogin = false;
+    static boolean isDeActive = false;
     static account acc = new account();
     static DecimalFormat df = new DecimalFormat("#,###.00");
 
@@ -9,29 +11,31 @@ public class main {
         Scanner scanner = new Scanner(System.in);
         clearScreen();
         for (int i = 0; i < 1;) {
-            int num = 0;
+            String num = "";
             try {
                 login_regis_menu();
-                num = scanner.nextInt();
+                while (true) {
+                    System.out.print("Enter your choice Login : ");
+                    num = scanner.nextLine();
+                    if (num.equals("1")) {
+                        login();
+                        if (isLogin) {
+                            menu();
+                        }
+                        break;
+                    } else if (num.equals("2")) {
+                        register();
+                        break;
+                    } else if (num.equals("3")) {
+                        System.exit(0);
+                    } else {
+                        System.out.println("Invalid input. Please try again.");
+                    }
+                }
             } catch (Exception e) {
                 scanner.next();
             }
 
-            switch (num) {
-                case 1:
-                    login();
-                    menu();
-                    break;
-                case 2:
-                    register();
-                    break;
-                case 3:
-                    System.exit(0);
-                    break;
-                default:
-                    System.out.println("Invalid input. Please try again.\n");
-                    break;
-            }
         }
 
     }
@@ -50,53 +54,49 @@ public class main {
 
         boolean flag = true;
         while (flag) {
-            System.out.print("Enter your choice : ");
-            int num = 0;
+            System.out.print("Enter your choice Menu : ");
+            String num = "";
             try {
-                num = scanner_menu.nextInt();
+                num = scanner_menu.nextLine();
             } catch (Exception e) {
                 scanner_menu.next();
             }
-            switch (num) {
-                case 1:
-                    deposit();
-                    // clearScreen();
-                    menu();
-                    break;
-                case 2:
-                    withdraw();
-                    // clearScreen();
-                    menu();
-                    break;
-                case 3:
-                    transfer();
-                    // clearScreen();
-                    menu();
-                    break;
-                case 4:
-                    deactivate();
-                    // clearScreen();
+            if (num.equals("1")) {
+                deposit();
+                // clearScreen();
+                menu();
+            } else if (num.equals("2")) {
+                withdraw();
+                // clearScreen();
+                menu();
+            } else if (num.equals("3")) {
+                transfer();
+                // clearScreen();
+                menu();
+            } else if (num.equals("4")) {
+                deactivate();
+                if (isDeActive) {
                     flag = false;
-                    break;
-                case 5:
-                    myAccount();
+                } else {
                     menu();
-                    break;
-                case 6:
-                    logout();
-                    flag = false;
-                    break;
-                default:
-                    System.out.println("Invalid input. Please try again.");
-                    break;
+                }
+                // clearScreen();
+            } else if (num.equals("5")) {
+                myAccount();
+                menu();
+            } else if (num.equals("6")) {
+                logout();
+                flag = false;
+            } else {
+                System.out.println("Invalid input. Please try again.");
             }
         }
     }
 
-    static void logout(){
+    static void logout() {
         System.out.println("Logout successfully.");
         main(null);
-    } 
+    }
 
     static void myAccount() {
         Scanner scanner_myAccount = new Scanner(System.in);
@@ -121,7 +121,7 @@ public class main {
 
         boolean flag = true;
         while (flag) {
-            System.out.print("Enter your choice : ");
+            System.out.print("Enter your choice Deactivate : ");
             int num = 0;
             try {
                 num = scanner_deactivate.nextInt();
@@ -131,6 +131,7 @@ public class main {
             if (num == 1) {
                 acc.deActivate();
                 System.out.println("Deactivate success.");
+                isDeActive = true;
                 flag = false;
             } else if (num == 2) {
                 flag = false;
@@ -147,10 +148,15 @@ public class main {
         String nameToTransfer = "";
         String id_acc = "";
         System.out.println("<><><><><> Transfer <><><><><>");
+        System.out.println("<><><><><> [00] Back <><><><><>");
 
         while (true) {
             System.out.print("Enter ID Account : ");
             id_acc = scanner_transfer.nextLine();
+            if (id_acc.equals("00")) {
+                return;
+            }
+            id_acc.trim();
             if (acc.check_id_acc(id_acc)) {
                 nameToTransfer = acc.getNameByID(id_acc);
                 System.out.println("Name : " + nameToTransfer);
@@ -163,8 +169,11 @@ public class main {
         while (true) {
             System.out.print("Enter amount : ");
             float amount = scanner_transfer.nextFloat();
+            if (amount == 00) {
+                return;
+            }
             if (amount <= 0 || amount > acc.getMoney()) {
-                System.out.println("Invalid input. Please try again.\n");
+                System.out.println("Invalid input. Please try again.");
             } else {
                 acc.transfer(id_acc, amount);
                 break;
@@ -176,13 +185,29 @@ public class main {
     static void withdraw() {
         Scanner scanner_withdraw = new Scanner(System.in);
         clearScreen();
-        System.out.println("<><><><><> Withdraw <><><><><>");
-        System.out.print("Enter amount : ");
-        Double amount = scanner_withdraw.nextDouble();
-        if (amount <= 0) {
-            System.out.println("Invalid input. Please try again.\n");
-            withdraw();
+        System.out.println("><><><><><> Withdraw <><><><><><");
+        System.out.println("<><><><><> [00] Back <><><><><>");
+        double amount = 0.0;
+        boolean flag = true;
+
+        while (flag) {
+            try {
+                System.out.print("Enter amount : ");
+                amount = scanner_withdraw.nextDouble();
+                flag = false;
+                if (amount == 00) {
+                    return;
+                }
+            } catch (Exception e) {
+                scanner_withdraw.next();
+                amount = 0.0;
+            }
+            if (amount <= 0) {
+                System.out.println("Invalid input. Please try again.\n");
+                withdraw();
+            }
         }
+
         if (amount > acc.getMoney()) {
             System.out.println("Your balance is not enough.");
             System.out.println("Your balance is " + acc.getMoney());
@@ -197,6 +222,7 @@ public class main {
         Scanner scanner_deposit = new Scanner(System.in);
         clearScreen();
         System.out.println("<><><><><> Deposit <><><><><>");
+        System.out.println("<><><><><> [00] Back <><><><><>");
         boolean flag = true;
         Double amount = 0.0;
 
@@ -204,6 +230,9 @@ public class main {
             try {
                 System.out.print("Enter amount : ");
                 amount = scanner_deposit.nextDouble();
+                if (amount == 00) {
+                    return;
+                }
                 flag = false;
             } catch (Exception e) {
                 scanner_deposit.next();
@@ -226,22 +255,38 @@ public class main {
         System.out.println("2. Register");
         System.out.println("3. Exit");
         System.out.println("<><><><><><><><><><>");
-        System.out.print("Enter your choice : ");
     }
 
     static void login() {
         Scanner scanner_log = new Scanner(System.in);
         // clearScreen();
+        System.out.println("<><><><> Login <><><><>");
+        System.out.println("<><><> [//] Back <><><>");
         System.out.print("Username : ");
         String username = scanner_log.nextLine();
+        username.trim();
+        if (check_back(username))
+            return;
         System.out.print("Password : ");
         String password = scanner_log.nextLine();
+        password.trim();
+        if (check_back(password))
+            return;
 
         if (acc.login(username, password)) {
             System.out.println("* Login success. *");
+            isLogin = true;
         } else {
             System.out.println("* Login failed. *");
             login();
+        }
+    }
+
+    static boolean check_back(String input) {
+        if (input.equals("//")) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -250,29 +295,45 @@ public class main {
         clearScreen();
 
         System.out.println("<><><> Register <><><>");
+        System.out.println("<><><> [//] Back <><><>");
 
         System.out.print("First name : "); // First name
         String fname = scanner_reg.nextLine();
+        fname.trim();
+        if (check_back(fname))
+            return;
 
         System.out.print("Last name : "); // Last name
         String lname = scanner_reg.nextLine();
+        lname.trim();
+        if (check_back(lname))
+            return;
 
         String phone = "";
         do {
             System.out.print("Phone number : "); // Phone number
             phone = scanner_reg.nextLine();
+            phone.trim();
+            if (check_back(phone))
+                return;
         } while (!check_phone(phone));
 
         String email = "";
         do {
             System.out.print("Email : "); // Email
             email = scanner_reg.nextLine();
+            email.trim();
+            if (check_back(email))
+                return;
         } while (!check_email(email));
 
         String username = "";
         do {
             System.out.print("Username : "); // Username
             username = scanner_reg.nextLine();
+            username.trim();
+            if (check_back(username))
+                return;
         } while (!acc.check_unique_username(username));
 
         String password = "";
@@ -280,9 +341,15 @@ public class main {
         do {
             System.out.print("Password : "); // Password
             password = scanner_reg.nextLine();
+            password.trim();
+            if (check_back(password))
+                return;
 
             System.out.print("Confirm Password : "); // Confirm Password
             confirm_password = scanner_reg.nextLine();
+            confirm_password.trim();
+            if (check_back(confirm_password))
+                return;
         } while (!check_password(password, confirm_password));
 
         if (acc.register(fname, lname, username, password, email, phone)) {
@@ -302,19 +369,22 @@ public class main {
     }
 
     static boolean check_phone(String phone) {
-        if (phone.length() == 10) {
+        if (phone.matches("0[0-9]{9}$")) {
             return true;
         } else {
-            System.out.println("Phone number must be 10 digits");
+            System.out.println("Phone number input invalid.");
             return false;
         }
     }
 
     static boolean check_email(String email) {
-        if (email.contains("@")) {
+        String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile(ePattern);
+        java.util.regex.Matcher m = p.matcher(email);
+        if (m.matches()) {
             return true;
         } else {
-            System.out.println("Email must contain '@'");
+            System.out.println("Email input invalid.");
             return false;
         }
     }
